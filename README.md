@@ -1,7 +1,7 @@
-# AI-Powered Development Agent
+# Docme-Ag Ai Documentation and Versioning Agent
 
 ## Overview
-This project aims to develop an AI-powered development agent that assists in software development workflows by:
+This project aims to develop an AI-powered documentation and versioning agent that assists in software development workflows by:
 - Tracking the code development process.
 - Automatically committing changes at appropriate stages.
 - Handling versioning as necessary.
