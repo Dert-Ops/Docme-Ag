@@ -1,7 +1,7 @@
-# AI Tabanlı Geliştirme Asistanı
+# Docme-Ag Yapay Zeka Dökümantasyon ve Versiyonlama Asistanı
 
 ## Genel Bakış
-Bu proje, yazılım geliştirme süreçlerini takip eden ve yöneten bir yapay zeka destekli geliştirme asistanı geliştirmeyi amaçlamaktadır:
+Bu proje, yazılım geliştirme süreçlerini takip eden ve yöneten bir yapay zeka dökümantasyon ve versiyonlama asistanı geliştirmeyi amaçlamaktadır:
 - Kod geliştirme sürecini izler.
 - Uygun aşamalarda otomatik olarak commit işlemi yapar.
 - Gerekli yerlerde versiyonlama gerçekleştirir.
