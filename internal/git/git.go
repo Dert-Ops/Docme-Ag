@@ -1,9 +1,24 @@
 package git
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 )
+
+// **Git Diff ile Değişiklikleri Al**
+func GetGitDiff() (string, error) {
+	cmd := exec.Command("git", "diff", "--unified=0") // Sadece değişen satırları al
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("❌ Error getting Git diff: %v", err)
+	}
+
+	return out.String(), nil
+}
 
 func CreateVersionTag(version string) error {
 	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)

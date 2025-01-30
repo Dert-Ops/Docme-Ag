@@ -15,17 +15,23 @@ import (
 var semVerRegex = regexp.MustCompile(`\b\d+\.\d+\.\d+\b`)
 
 // Versiyonlama işlemini yöneten fonksiyon
+// Versiyonlama işlemini yöneten fonksiyon
 func RunVersioningAgent() {
+	reader := bufio.NewReader(os.Stdin)
+
 	fmt.Println("🤖 Generating version number using AI...")
 
-	// Tüm dosyaları oku
-	allFilesContent := collectProjectFiles(".")
-	reader := bufio.NewReader(os.Stdin)
+	// **Yalnızca değişen satırları al**
+	gitDiff, err := git.GetGitDiff()
+	if err != nil {
+		fmt.Println("❌ Error getting Git diff:", err)
+		return
+	}
 
 	var newVersion string
 	for {
 		// Gemini API'den versiyon önerisi al
-		prompt := fmt.Sprintf("Analyze this project and suggest a new Semantic Versioning number based on changes:\n\n%s", allFilesContent)
+		prompt := fmt.Sprintf("Analyze the following Git diff and suggest a new Semantic Versioning number:\n\n%s", gitDiff)
 		response, err := gemini.GetGeminiResponse(prompt)
 		if err != nil {
 			fmt.Println("❌ Error getting AI versioning suggestion:", err)
@@ -47,14 +53,14 @@ func RunVersioningAgent() {
 		input = strings.TrimSpace(input)
 
 		if input == "y" || input == "Y" {
-			break // Onaylandıysa döngüyü kır ve versiyon oluştur
+			break
 		} else if input == "r" || input == "R" {
 			fmt.Println("\n🔄 Regenerating version suggestion...")
 			prompt = fmt.Sprintf(
 				"The following version suggestion was incorrect. Generate a better Semantic Version number:\n\nPrevious version: v%s\n\nChanges:\n%s",
-				newVersion, allFilesContent,
+				newVersion, gitDiff,
 			)
-			continue // Yeni versiyon önerisi al
+			continue
 		} else {
 			fmt.Println("❌ Versioning canceled.")
 			return
@@ -63,7 +69,7 @@ func RunVersioningAgent() {
 
 	// Kullanıcı versiyonu onayladıysa tag oluştur ve push et
 	fmt.Printf("✅ Creating version tag v%s...\n", newVersion)
-	err := git.CreateVersionTag(newVersion)
+	err = git.CreateVersionTag(newVersion)
 	if err != nil {
 		fmt.Println("❌ Error creating version tag:", err)
 		return

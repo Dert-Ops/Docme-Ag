@@ -19,6 +19,8 @@ var supportedExtensions = map[string]struct{}{
 
 // Commit işlemini başlatan fonksiyon
 func RunCommitAgent() {
+	reader := bufio.NewReader(os.Stdin)
+
 	hasChanges, err := git.CheckGitStatus()
 	if err != nil {
 		fmt.Println("❌ Error checking git status:", err)
@@ -28,23 +30,26 @@ func RunCommitAgent() {
 		fmt.Println("✅ No changes detected.")
 		return
 	}
-	reader := bufio.NewReader(os.Stdin)
 
-	// Tüm proje dosyalarını oku
-	allFilesContent := collectProjectFiles(".")
+	// **Yalnızca değişen satırları al**
+	gitDiff, err := git.GetGitDiff()
+	if err != nil {
+		fmt.Println("❌ Error getting Git diff:", err)
+		return
+	}
 
 	// AI tarafından üretilen commit mesajı almak için döngü
 	var commitMessage string
 	for {
 		fmt.Println("🤖 Generating commit message using AI...")
-		prompt := fmt.Sprintf("Analyze these code changes and suggest a Conventional Commit message:\n\n%s", allFilesContent)
+		prompt := fmt.Sprintf("Analyze the following Git diff and suggest a Conventional Commit message:\n\n%s", gitDiff)
 		commitMessage, err = gemini.GetGeminiResponse(prompt)
 		if err != nil {
 			fmt.Println("❌ Error getting AI commit message:", err)
 			return
 		}
 
-		fmt.Println("\n📜 AI Suggested Commit Message:")
+		fmt.Println("\n📜 AI Suggested Commit Message:\n")
 		fmt.Println(commitMessage)
 		fmt.Println("\nDo you want to commit this change? (y/n/r)")
 
@@ -52,14 +57,14 @@ func RunCommitAgent() {
 		input = strings.TrimSpace(input)
 
 		if input == "y" || input == "Y" {
-			break // Onaylandıysa döngüyü kır ve commit işlemi yap
+			break
 		} else if input == "r" || input == "R" {
 			fmt.Println("\n🔄 Regenerating commit message...")
 			prompt = fmt.Sprintf(
 				"The following commit message was not correct. Generate a better Conventional Commit message:\n\nPrevious commit message:\n%s\n\nChanges:\n%s",
-				commitMessage, allFilesContent,
+				commitMessage, gitDiff,
 			)
-			continue // Yeni commit mesajı al
+			continue
 		} else {
 			fmt.Println("❌ Commit canceled.")
 			return
