@@ -44,7 +44,7 @@ func RunCommitAgent() {
 			return
 		}
 
-		fmt.Println("\n📜 AI Suggested Commit Message:\n")
+		fmt.Println("\n📜 AI Suggested Commit Message:")
 		fmt.Println(commitMessage)
 		fmt.Println("\nDo you want to commit this change? (y/n/r)")
 
