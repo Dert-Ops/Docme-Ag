@@ -5,6 +5,29 @@ import (
 	"os/exec"
 )
 
+func CreateVersionTag(version string) error {
+	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("error creating Git tag: %v", err)
+	}
+
+	fmt.Println("✅ Version", version, "created successfully!")
+	return nil
+}
+
+// Yeni versiyon etiketi push et
+func PushVersionTag(version string) error {
+	cmd := exec.Command("git", "push", "origin", "v"+version)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("error pushing Git tag: %v", err)
+	}
+
+	fmt.Println("✅ Version", version, "pushed successfully!")
+	return nil
+}
+
 // Git durumunu kontrol et
 func CheckGitStatus() (bool, error) {
 	cmd := exec.Command("git", "status", "--porcelain")
@@ -21,14 +44,12 @@ func CheckGitStatus() (bool, error) {
 
 // Git commit işlemi yap
 func CommitChanges(commitMessage string) error {
-	// Değişiklikleri ekle
 	cmd := exec.Command("git", "add", ".")
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("error adding files: %v", err)
 	}
 
-	// Commit işlemi yap
 	cmd = exec.Command("git", "commit", "-m", commitMessage)
 	err = cmd.Run()
 	if err != nil {
@@ -39,20 +60,14 @@ func CommitChanges(commitMessage string) error {
 	return nil
 }
 
-// Yeni versiyon etiketi oluştur ve push et
-func CreateVersionTag(version string) error {
-	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
+// Git push işlemi yap
+func PushChanges() error {
+	cmd := exec.Command("git", "push", "origin", "main")
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error creating Git tag: %v", err)
+		return fmt.Errorf("error pushing changes: %v", err)
 	}
 
-	cmd = exec.Command("git", "push", "origin", "v"+version)
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("error pushing Git tag: %v", err)
-	}
-
-	fmt.Println("✅ Version", version, "pushed successfully!")
+	fmt.Println("✅ Push successful!")
 	return nil
 }

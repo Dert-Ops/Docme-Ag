@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/Dert-Ops/Docme-Ag/config"
 )
@@ -89,5 +90,29 @@ func GetGeminiResponse(prompt string) (string, error) {
 		return "", fmt.Errorf("no response from Gemini API")
 	}
 
-	return response.Candidates[0].Content.Parts[0].Text, nil
+	// **Yanıtı parse ederek anlamlı hale getir**
+	return ParseGeminiResponse(response.Candidates[0].Content.Parts[0].Text), nil
+}
+
+// **Gemini Yanıtını Commit Mesajı veya Öneriler Haline Getir**
+func ParseGeminiResponse(response string) string {
+	lines := strings.Split(response, "\n")
+	var formattedLines []string
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "*") || strings.HasPrefix(line, "-") {
+			cleanedLine := strings.TrimPrefix(line, "* ")
+			cleanedLine = strings.TrimPrefix(cleanedLine, "- ")
+			formattedLines = append(formattedLines, "- "+cleanedLine) // Commit formatına uygun hale getir
+		}
+	}
+
+	// Eğer hiçbir madde işaretli satır bulunamazsa, response'u direkt döndür
+	if len(formattedLines) == 0 {
+		return response
+	}
+
+	// **Commit mesajına uygun formatta string döndür**
+	return fmt.Sprintf("refactor: AI-driven code improvements\n\n%s", strings.Join(formattedLines, "\n"))
 }

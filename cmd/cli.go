@@ -5,13 +5,14 @@ import (
 	"os"
 )
 
-// Ana CLI giriş noktası
+// CLI giriş noktası
 func ExecuteCommand() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: docm <command>")
 		fmt.Println("Commands:")
 		fmt.Println("  cm   - Commit changes using AI-generated messages")
 		fmt.Println("  vs   - Generate new version using AI")
+		fmt.Println("  watch - Start file watcher and send changes to AI")
 		return
 	}
 
@@ -20,6 +21,8 @@ func ExecuteCommand() {
 		RunCommitAgent()
 	case "vs":
 		RunVersioningAgent()
+	case "watch":
+		WatchFiles(".") // Bulunduğun klasörü izle
 	default:
 		fmt.Println("Unknown command:", os.Args[1])
 	}
