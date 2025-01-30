@@ -6,15 +6,22 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/Dert-Ops/Docme-Ag/config"
 )
 
-// Gemini 1.5 API URL
-const apiURL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent"
+type GeminiResponse struct {
+	Candidates []struct {
+		Content struct {
+			Parts []struct {
+				Text string `json:"text"`
+			} `json:"parts"`
+		} `json:"content"`
+	} `json:"candidates"`
+}
 
-// API İstek Formatı
 type GeminiRequest struct {
 	Contents []GeminiContent `json:"contents"`
 }
@@ -27,25 +34,44 @@ type GeminiPart struct {
 	Text string `json:"text"`
 }
 
-// API Yanıt Formatı
-type GeminiResponse struct {
-	Candidates []struct {
-		Content struct {
-			Parts []struct {
-				Text string `json:"text"`
-			} `json:"parts"`
-		} `json:"content"`
-	} `json:"candidates"`
+// Gemini 1.5 API URL
+const apiURL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent"
+
+// Semantic Versioning formatını kontrol eden regex
+var commitRegex = regexp.MustCompile(`^(feat|fix|chore|docs|style|refactor|test|ci|build)(\(\w+\))?: (.+)$`)
+
+// **Gemini Yanıtını Commit Mesajına Uygun Hale Getiren Fonksiyon**
+func ParseCommitMessage(response string) string {
+	lines := strings.Split(response, "\n")
+
+	var commitHeader string
+	var commitBody []string
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if commitRegex.MatchString(line) {
+			commitHeader = line // İlk Conventional Commit formatına uyan satırı al
+		} else if len(line) > 0 && len(commitHeader) > 0 {
+			commitBody = append(commitBody, "- "+line) // Diğer açıklamaları madde işaretli hale getir
+		}
+	}
+
+	// Eğer başlık bulunamazsa, varsayılan bir başlık belirle
+	if commitHeader == "" {
+		commitHeader = "chore: AI-generated commit message"
+	}
+
+	// Commit mesajını Conventional Commits formatına uygun hale getir
+	return fmt.Sprintf("%s\n\n%s", commitHeader, strings.Join(commitBody, "\n"))
 }
 
-// Gemini 1.5 API’ye mesaj gönder ve yanıt al
+// Gemini API'ye mesaj gönder ve yanıtı Conventional Commits formatına uygun olarak parse et
 func GetGeminiResponse(prompt string) (string, error) {
-	apiKey := config.GetAPIKey() // API anahtarını çevresel değişkenden al
+	apiKey := config.GetAPIKey()
 	if apiKey == "" {
 		return "", fmt.Errorf("GEMINI_API_KEY is not set")
 	}
 
-	// Gemini API formatına uygun istek verisi
 	requestBody, err := json.Marshal(GeminiRequest{
 		Contents: []GeminiContent{
 			{Parts: []GeminiPart{{Text: prompt}}},
@@ -55,64 +81,34 @@ func GetGeminiResponse(prompt string) (string, error) {
 		return "", fmt.Errorf("failed to marshal request body: %v", err)
 	}
 
-	// HTTP isteğini oluştur
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", apiURL+"?key="+apiKey, bytes.NewBuffer(requestBody))
 	if err != nil {
 		return "", fmt.Errorf("failed to create HTTP request: %v", err)
 	}
 
-	// Header bilgileri
 	req.Header.Set("Content-Type", "application/json")
 
-	// API isteğini gönder
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to send request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Yanıtı oku
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	// JSON parse et
 	var response GeminiResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse JSON response: %v", err)
 	}
 
-	// Yanıtı döndür
 	if len(response.Candidates) == 0 || len(response.Candidates[0].Content.Parts) == 0 {
 		return "", fmt.Errorf("no response from Gemini API")
 	}
 
-	// **Yanıtı parse ederek anlamlı hale getir**
-	return ParseGeminiResponse(response.Candidates[0].Content.Parts[0].Text), nil
-}
-
-// **Gemini Yanıtını Commit Mesajı veya Öneriler Haline Getir**
-func ParseGeminiResponse(response string) string {
-	lines := strings.Split(response, "\n")
-	var formattedLines []string
-
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "*") || strings.HasPrefix(line, "-") {
-			cleanedLine := strings.TrimPrefix(line, "* ")
-			cleanedLine = strings.TrimPrefix(cleanedLine, "- ")
-			formattedLines = append(formattedLines, "- "+cleanedLine) // Commit formatına uygun hale getir
-		}
-	}
-
-	// Eğer hiçbir madde işaretli satır bulunamazsa, response'u direkt döndür
-	if len(formattedLines) == 0 {
-		return response
-	}
-
-	// **Commit mesajına uygun formatta string döndür**
-	return fmt.Sprintf("refactor: AI-driven code improvements\n\n%s", strings.Join(formattedLines, "\n"))
+	return response.Candidates[0].Content.Parts[0].Text, nil
 }

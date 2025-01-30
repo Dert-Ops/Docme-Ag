@@ -21,8 +21,6 @@ func ExecuteCommand() {
 		RunCommitAgent()
 	case "vs":
 		RunVersioningAgent()
-	case "watch":
-		WatchFiles(".") // Bulunduğun klasörü izle
 	default:
 		fmt.Println("Unknown command:", os.Args[1])
 	}
