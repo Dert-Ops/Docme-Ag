@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-
-	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 )
 
 // Ana CLI giriş noktası
@@ -18,8 +16,6 @@ func ExecuteCommand() {
 	}
 
 	switch os.Args[1] {
-	case "deneme":
-		gemini.CreateGenerativeModel()
 	case "cm":
 		RunCommitAgent()
 	case "vs":

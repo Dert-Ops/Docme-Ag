@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Dert-Ops/Docme-Ag/internal/chatgpt"
+	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 	"github.com/Dert-Ops/Docme-Ag/internal/git"
 )
 
@@ -20,9 +20,9 @@ func RunCommitAgent() {
 		return
 	}
 
-	// ChatGPT'den commit mesajı al
+	// Gemini 1.5 API'den commit mesajı al
 	fmt.Println("Generating commit message using AI...")
-	commitMessage, err := chatgpt.GetChatGPTResponse("Suggest a Git commit message based on the latest code changes.")
+	commitMessage, err := gemini.GetGeminiResponse("Suggest a Git commit message based on the latest code changes.")
 	if err != nil {
 		fmt.Println("Error getting AI commit message:", err)
 		return

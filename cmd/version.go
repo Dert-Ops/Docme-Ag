@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Dert-Ops/Docme-Ag/internal/chatgpt"
+	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 	"github.com/Dert-Ops/Docme-Ag/internal/git"
 )
 
@@ -11,8 +11,8 @@ import (
 func RunVersioningAgent() {
 	fmt.Println("Generating version number using AI...")
 
-	// ChatGPT'den Semantic Versioning için yeni sürüm numarası al
-	newVersion, err := chatgpt.GetChatGPTResponse("Suggest a new Semantic Version number based on recent changes.")
+	// Gemini 1.5 API'den yeni Semantic Versioning numarası al
+	newVersion, err := gemini.GetGeminiResponse("Suggest a new Semantic Version number based on recent changes.")
 	if err != nil {
 		fmt.Println("Error getting AI versioning suggestion:", err)
 		return
