@@ -29,9 +29,12 @@ func RunVersioningAgent() {
 	}
 
 	var newVersion string
+	var prompt string
 	for {
 		// Gemini API'den versiyon önerisi al
-		prompt := fmt.Sprintf("Analyze the following Git diff and suggest a new Semantic Versioning number:\n\n%s", gitDiff)
+		if prompt == "" {
+			prompt = fmt.Sprintf("Analyze the following Git diff and suggest a new Semantic Versioning number:\n\n%s", gitDiff)
+		}
 		response, err := gemini.GetGeminiResponse(prompt)
 		if err != nil {
 			fmt.Println("❌ Error getting AI versioning suggestion:", err)
@@ -56,6 +59,10 @@ func RunVersioningAgent() {
 			break
 		} else if input == "r" || input == "R" {
 			fmt.Println("\n🔄 Regenerating version suggestion...")
+			prompt = fmt.Sprintf(
+				"The following version suggestion was incorrect. Generate a better Semantic Version number:\n\nPrevious version: v%s\n\nChanges:\n%s",
+				newVersion, gitDiff,
+			)
 			continue
 		} else {
 			fmt.Println("❌ Versioning canceled.")

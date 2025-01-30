@@ -4,7 +4,27 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 )
+
+// **Mevcut branch adını al**
+func GetCurrentBranch() (string, error) {
+	cmd := exec.Command("git", "branch", "--show-current")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("❌ Error getting current branch: %v", err)
+	}
+
+	branch := strings.TrimSpace(out.String())
+	if branch == "" {
+		return "", fmt.Errorf("❌ No active Git branch found")
+	}
+
+	return branch, nil
+}
 
 // **Git Diff ile Değişiklikleri Al**
 func GetGitDiff() (string, error) {
@@ -75,14 +95,23 @@ func CommitChanges(commitMessage string) error {
 	return nil
 }
 
-// Git push işlemi yap
+// **Git Push İşlemini Mevcut Branch İçin Yap**
 func PushChanges() error {
-	cmd := exec.Command("git", "push", "origin", "main")
-	err := cmd.Run()
+	branch, err := GetCurrentBranch()
 	if err != nil {
-		return fmt.Errorf("error pushing changes: %v", err)
+		return err // Mevcut branch alınamazsa hata döndür
 	}
 
-	fmt.Println("✅ Push successful!")
+	fmt.Printf("📤 Pushing changes to remote repository (branch: %s)...\n", branch)
+	cmd := exec.Command("git", "push", "origin", branch)
+	cmd.Stdout = nil // Terminal çıktısını göster
+	cmd.Stderr = nil
+
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("❌ Error pushing changes to branch %s: %v", branch, err)
+	}
+
+	fmt.Println("✅ Changes successfully pushed!")
 	return nil
 }

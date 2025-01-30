@@ -33,9 +33,12 @@ func RunCommitAgent() {
 
 	// AI tarafından üretilen commit mesajı almak için döngü
 	var commitMessage string
+	var prompt string
 	for {
 		fmt.Println("🤖 Generating commit message using AI...")
-		prompt := fmt.Sprintf("Analyze the following Git diff and suggest a Conventional Commit message:\n\n%s", gitDiff)
+		if prompt == "" {
+			prompt = fmt.Sprintf("Analyze the following Git diff and suggest a Conventional Commit message:\n\n%s", gitDiff)
+		}
 		commitMessage, err = gemini.GetGeminiResponse(prompt)
 		if err != nil {
 			fmt.Println("❌ Error getting AI commit message:", err)
@@ -52,8 +55,14 @@ func RunCommitAgent() {
 		if input == "y" || input == "Y" {
 			break
 		} else if input == "r" || input == "R" {
-			fmt.Println("\n🔄 Regenerating commit message...")
-			continue
+			fmt.Println("\n🔄 Regenerating commit message with AI...")
+
+			// Önceki commit mesajını ve değişiklikleri AI'ye tekrar gönder
+			prompt = fmt.Sprintf(
+				"The following commit message was incorrect. Generate a better Conventional Commit message:\n\nPrevious commit message:\n%s\n\nChanges:\n%s",
+				commitMessage, gitDiff,
+			)
+			continue // Yeni commit mesajı al
 		} else {
 			fmt.Println("❌ Commit canceled.")
 			return
