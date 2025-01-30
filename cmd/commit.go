@@ -4,18 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 	"github.com/Dert-Ops/Docme-Ag/internal/git"
 )
-
-// Desteklenen dosya uzantıları
-var supportedExtensions = map[string]struct{}{
-	".go": {}, ".py": {}, ".js": {}, ".ts": {},
-	".java": {}, ".cpp": {}, ".c": {}, ".cs": {},
-}
 
 // Commit işlemini başlatan fonksiyon
 func RunCommitAgent() {
@@ -49,7 +42,7 @@ func RunCommitAgent() {
 			return
 		}
 
-		fmt.Println("\n📜 AI Suggested Commit Message:\n")
+		fmt.Println("\n📜 AI Suggested Commit Message:")
 		fmt.Println(commitMessage)
 		fmt.Println("\nDo you want to commit this change? (y/n/r)")
 
@@ -60,10 +53,6 @@ func RunCommitAgent() {
 			break
 		} else if input == "r" || input == "R" {
 			fmt.Println("\n🔄 Regenerating commit message...")
-			prompt = fmt.Sprintf(
-				"The following commit message was not correct. Generate a better Conventional Commit message:\n\nPrevious commit message:\n%s\n\nChanges:\n%s",
-				commitMessage, gitDiff,
-			)
 			continue
 		} else {
 			fmt.Println("❌ Commit canceled.")
@@ -95,34 +84,4 @@ func RunCommitAgent() {
 	} else {
 		fmt.Println("❌ Push canceled.")
 	}
-}
-
-// **Tüm proje dosyalarını oku ve içeriği tek bir string olarak döndür**
-func collectProjectFiles(rootDir string) string {
-	var allFilesContent strings.Builder
-
-	// Dosya ve dizinleri gez
-	filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-		if info.IsDir() {
-			return nil // Klasörleri atla
-		}
-		if _, exists := supportedExtensions[filepath.Ext(path)]; !exists {
-			return nil // Desteklenmeyen dosya türlerini atla
-		}
-
-		// Dosya içeriğini oku
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return nil
-		}
-
-		// İçeriği ekle
-		allFilesContent.WriteString(fmt.Sprintf("\n\nFile: %s\n%s", path, string(content)))
-		return nil
-	})
-
-	return allFilesContent.String()
 }

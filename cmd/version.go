@@ -56,10 +56,6 @@ func RunVersioningAgent() {
 			break
 		} else if input == "r" || input == "R" {
 			fmt.Println("\n🔄 Regenerating version suggestion...")
-			prompt = fmt.Sprintf(
-				"The following version suggestion was incorrect. Generate a better Semantic Version number:\n\nPrevious version: v%s\n\nChanges:\n%s",
-				newVersion, gitDiff,
-			)
 			continue
 		} else {
 			fmt.Println("❌ Versioning canceled.")
