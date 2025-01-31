@@ -12,7 +12,6 @@ func ExecuteCommand() {
 		fmt.Println("Commands:")
 		fmt.Println("  cm   - Commit changes using AI-generated messages")
 		fmt.Println("  vs   - Generate new version using AI")
-		fmt.Println("  watch - Start file watcher and send changes to AI")
 		return
 	}
 
