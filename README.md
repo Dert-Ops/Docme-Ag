@@ -1,90 +1,109 @@
-# Docme-Ag Ai Documentation and Versioning Agent
+# 🚀 Docme-Ag: AI-Powered Commit & Versioning Agent  
 
-## Overview
-This project aims to develop an AI-powered documentation and versioning agent that assists in software development workflows by:
-- Tracking the code development process.
-- Automatically committing changes at appropriate stages.
-- Handling versioning as necessary.
-- Maintaining project documentation.
+**Version: v1.2.0**
 
-## Features
-- **Automated Git Commit & Versioning**: The agent observes code changes and commits them when necessary using predefined standards.
-- **Intelligent Documentation Management**: Updates and maintains a structured documentation system.
-- **Seamless Integration**: Works with GitHub repositories effortlessly.
-- **Configurable Workflow**: Allows users to define custom commit policies.
-- **Support for Multiple Programming Languages**: Can track and manage repositories in various languages.
+Docme-Ag is an AI-powered CLI tool that automates commit message generation, versioning, and documentation updates in your software projects.
 
-## Commit Message Standard
-This project follows the **Conventional Commits** standard to ensure clarity and consistency in commit messages. The AI agent automatically generates commit messages using this standard. The format is as follows:
+## 🎯 Features
+- **AI-Generated Commit Messages** - Uses Google Gemini AI to generate commit messages based on code changes.
+- **Automatic Versioning** - Determines the appropriate semantic version number.
+- **README Auto-Updater** - Updates README.md based on new versions and commits.
+- **GitHub Integration** - Works seamlessly with GitHub repositories.
+
+---
+
+## 📥 Installation  
+
+### 🔹 **Install via Installer Script**  
+You can install `docm` by running the following command:  
+```sh
+curl -fsSL https://raw.githubusercontent.com/Dert-Ops/Docme-Ag/main/installer.sh | bash
+```
+
+### 🔹 **Manual Installation**  
+Alternatively, download the binary manually:  
+```sh
+LATEST_VERSION=$(curl -s https://api.github.com/repos/Dert-Ops/Docme-Ag/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+wget -O docm "https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-linux-amd64"
+chmod +x docm
+mv docm /usr/local/bin/
+```
+
+After installation, make sure you set up your **GEMINI API KEY**:  
+```sh
+echo 'export GEMINI_API_KEY="your-api-key-here"' >> ~/.bashrc
+source ~/.bashrc
+```
+For **Mac users** (zsh default shell):  
+```sh
+echo 'export GEMINI_API_KEY="your-api-key-here"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+---
+
+## 🚀 Usage  
+
+Run the following commands in your terminal:  
+
+🔹 **Generate AI-powered commit messages:**  
+```sh
+docm cm
+```
+
+🔹 **Generate a new semantic version:**  
+```sh
+docm vs
+```
+
+🔹 **Update README with the latest changes:**  
+```sh
+docm update-readme
+```
+
+---
+
+## 📝 Commit Message Standard (Conventional Commits)  
+This project follows the **Conventional Commits** standard for clarity and consistency.  
 
 ```
 <type>(<scope>): <description>
 ```
 
-- `type`: The type of change (e.g., `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`).
-- `scope`: The affected module or component.
-- `description`: A concise description of the change.
+- **type**: `feat`, `fix`, `chore`, `docs`, `style`, `refactor`, `test`
+- **scope**: Affected module or component
+- **description**: A concise description of the change
 
-**Examples:**
-```
-feat(api): add new authentication system
-fix(ui): resolve layout issue in the navbar
+Examples:
+```sh
+feat(api): add user authentication
+fix(ui): resolve navbar layout issue
 docs(readme): update installation instructions
 ```
 
-## Versioning Standard
-This project follows **Semantic Versioning (SemVer)**, and the AI agent automatically determines version updates based on the nature of the changes.
+---
 
+## 🏷️ Versioning Standard (Semantic Versioning)  
+Docme-Ag follows **Semantic Versioning (SemVer)**:  
 ```
 MAJOR.MINOR.PATCH
 ```
+- **MAJOR** - Breaking changes  
+- **MINOR** - New features (backward-compatible)  
+- **PATCH** - Bug fixes and minor improvements  
 
-- **MAJOR**: Breaking changes.
-- **MINOR**: New features (backward-compatible).
-- **PATCH**: Bug fixes and minor improvements.
-
-**Examples:**
-```
+Examples:
+```sh
 1.0.0  # Initial stable release
 1.1.0  # New feature added
 1.1.1  # Minor bug fix
-2.0.0  # Major change, breaking backward compatibility
+2.0.0  # Breaking change
 ```
 
+---
 
-##  📌 New Version: v1.1.0
+## 🎯 Contributing  
+Contributions are welcome! Open an issue or create a pull request.
 
-- **Reason for Version Change:** The changes modify the functionality of existing features, requiring a minor version bump.
-- **Summary of Changes:**
-    - Modified `UpdateReadme` function to accept version, reason, and summary.
-    - Updated prompt generation for README updates.
-    - Enhanced `ExtractVersionAndReason` to extract summary and handle missing versions.
-    - Improved `GetCurrentVersion` and `RunVersioningAgent` with better comments and logic.
-
-
-## Installation
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/yourusername/your-repo.git
-   cd your-repo
-   ```
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
-3. Run the agent:
-   ```sh
-   python main.py
-   ```
-
-## Usage
-- The agent continuously monitors code changes.
-- It automatically commits changes based on a configurable policy using Conventional Commits.
-- Maintains project documentation and version logs.
-- Automatically updates the project version using Semantic Versioning principles.
-
-## Contributing
-Contributions are welcome! Please open an issue or create a pull request to discuss changes.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📜 License  
+This project is licensed under the MIT License.
