@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 
 	"github.com/Dert-Ops/Docme-Ag/config"
 )
@@ -38,9 +37,6 @@ type GeminiResponse struct {
 		} `json:"content"`
 	} `json:"candidates"`
 }
-
-// Semantic Versioning formatını kontrol eden regex
-var commitRegex = regexp.MustCompile(`^(feat|fix|chore|docs|style|refactor|test|ci|build)(\(\w+\))?: (.+)$`)
 
 // **Gemini API'ye mesaj gönder ve yanıt al (`context` doğrudan `user` promptuna eklendi!)**
 func GetGeminiResponse(context, prompt string) (string, error) {
