@@ -10,7 +10,6 @@ OS="$(uname -s)"
 ARCH="amd64"
 BINARY_URL=""
 
-# En son sürüm numarasını al
 LATEST_VERSION=$(curl -s https://api.github.com/repos/Dert-Ops/Docme-Ag/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ "$OS" == "Linux" ]; then
@@ -23,7 +22,7 @@ else
 fi
 
 echo "📥 Downloading docm $LATEST_VERSION for $OS..."
-wget -O docm "$BINARY_URL"
+wget -O docm $BINARY_URL
 
 # Binary'yi sistem dizinine taşı
 echo "🚀 Installing to /usr/local/bin/..."
