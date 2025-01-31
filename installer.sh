@@ -1,45 +1,30 @@
 #!/bin/bash
 
-# Kurulum başlıyor
-echo "🚀 Setting up AI Dev Agent..."
+# Kullanıcının işletim sistemini tespit et
+OS="$(uname -s)"
+ARCH="amd64"
+BINARY_URL=""
 
-# Gerekli paketleri yükle
-echo "🔍 Checking for Go installation..."
-if ! command -v go &> /dev/null
-then
-    echo "⚠ Go is not installed. Please install Go and rerun this script."
+# En son sürüm numarasını al
+LATEST_VERSION=$(curl -s https://api.github.com/repos/Dert-Ops/Docme-Ag/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ "$OS" == "Linux" ]; then
+    BINARY_URL="https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-linux-amd64"
+elif [ "$OS" == "Darwin" ]; then
+    BINARY_URL="https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-mac-amd64"
+else
+    echo "❌ Unsupported OS: $OS"
     exit 1
 fi
 
-# Projeyi klonla ve içeri gir
-if [ ! -d "docme-ag" ]; then
-    echo "📥 Cloning repository..."
-    git clone https://github.com/dert-ops/docme-ag.git
-fi
-cd docme-ag || exit
+echo "📥 Downloading docm $LATEST_VERSION for $OS..."
+wget -O docm "$BINARY_URL"
 
-# Go bağımlılıklarını yükle
-echo "📦 Installing dependencies..."
-go mod tidy
+# Binary'yi sistem dizinine taşı
+echo "🚀 Installing to /usr/local/bin/..."
+sudo mv docm /usr/local/bin/docm
 
-# Go binary derle
-echo "🔨 Building project..."
-go build -o docm main.go
+# İzinleri ayarla
+sudo chmod +x /usr/local/bin/docm
 
-# Alias'ı kullanıcının shell profil dosyasına ekle
-if [[ "$SHELL" == *"zsh"* ]]; then
-    PROFILE_FILE="$HOME/.zshrc"
-elif [[ "$SHELL" == *"bash"* ]]; then
-    PROFILE_FILE="$HOME/.bashrc"
-else
-    PROFILE_FILE="$HOME/.profile"
-fi
-
-echo "🔧 Adding alias to $PROFILE_FILE..."
-echo 'alias docm="$(pwd)/docm"' >> "$PROFILE_FILE"
-
-# Değişiklikleri yükle
-echo "🔄 Reloading shell configuration..."
-source "$PROFILE_FILE"
-
-echo "✅ Installation complete! You can now use 'docm cm' and 'docm vs' commands."
+echo "✅ Installation complete! Now you can use 'docm cm' or 'docm vs'."
