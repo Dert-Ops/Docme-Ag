@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ENV Dosyası Konumları
+USER_ENV="$HOME/.docm.env"
+SYSTEM_ENV="/etc/docm.env"
+DEFAULT_ENV_CONTENT="GEMINI_API_KEY=your-api-key-here"
+
 # Kullanıcının işletim sistemini tespit et
 OS="$(uname -s)"
 ARCH="amd64"
@@ -23,8 +28,16 @@ wget -O docm "$BINARY_URL"
 # Binary'yi sistem dizinine taşı
 echo "🚀 Installing to /usr/local/bin/..."
 sudo mv docm /usr/local/bin/docm
-
-# İzinleri ayarla
 sudo chmod +x /usr/local/bin/docm
+
+# Kullanıcıya ENV dosyasının konumunu sormadan önce, var olup olmadığını kontrol et
+if [ ! -f "$USER_ENV" ] && [ ! -f "$SYSTEM_ENV" ]; then
+    echo "🔧 No existing .env file found. Creating a new one..."
+    echo "$DEFAULT_ENV_CONTENT" > "$USER_ENV"
+    chmod 600 "$USER_ENV"
+    echo "✅ Please update your API key in $USER_ENV"
+else
+    echo "✅ Existing .env file found. No changes were made."
+fi
 
 echo "✅ Installation complete! Now you can use 'docm cm' or 'docm vs'."

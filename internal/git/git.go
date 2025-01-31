@@ -44,22 +44,22 @@ func CreateVersionTag(version string) error {
 	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error creating Git tag: %v", err)
+		return fmt.Errorf("❌ Error creating Git tag: %v", err)
 	}
 
-	fmt.Println("✅ Version", version, "created successfully!")
+	fmt.Println("✅ Created new Git tag:", version)
 	return nil
 }
 
-// Yeni versiyon etiketi push et
+// Versiyon tag'ını remote repoya push et
 func PushVersionTag(version string) error {
 	cmd := exec.Command("git", "push", "origin", "v"+version)
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error pushing Git tag: %v", err)
+		return fmt.Errorf("❌ Error pushing Git tag: %v", err)
 	}
 
-	fmt.Println("✅ Version", version, "pushed successfully!")
+	fmt.Println("✅ Pushed Git tag:", version)
 	return nil
 }
 
