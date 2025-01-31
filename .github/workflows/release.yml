@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20
+
+      - name: Build Binaries
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o docm-linux-amd64 main.go
+          GOOS=darwin GOARCH=amd64 go build -o docm-mac-amd64 main.go
+          GOOS=windows GOARCH=amd64 go build -o docm-windows-amd64.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            docm-linux-amd64
+            docm-mac-amd64
+            docm-windows-amd64.exe
