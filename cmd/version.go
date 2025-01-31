@@ -14,10 +14,14 @@ import (
 )
 
 // Semantic Versioning formatını kontrol eden regex
-var semVerRegex = regexp.MustCompile(`\b\d+\.\d+\.\d+\b`)
+var (
+	SemVerRegex  = regexp.MustCompile(`(?i)VERSION:\s*v?(\d+\.\d+\.\d+)`)
+	ReasonRegex  = regexp.MustCompile(`(?i)EXPLANATION:\s*([\s\S]+?)\n\nSUMMARY OF CHANGES:`)
+	SummaryRegex = regexp.MustCompile(`(?i)SUMMARY OF CHANGES:\s*([\s\S]+)`)
+)
 
+// **Git üzerinden en son versiyon numarasını al**
 func GetCurrentVersion() string {
-	// `git describe --tags` ile en son versiyon tag'ini al
 	cmd := exec.Command("git", "describe", "--tags", "--abbrev=0")
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -25,17 +29,17 @@ func GetCurrentVersion() string {
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println("⚠️  Warning: No Git version tags found. Defaulting to v0.1.0")
-		return "0.1.0" // Eğer hiç tag yoksa varsayılan değer
+		return "0.1.0"
 	}
 
 	return strings.TrimSpace(out.String()) // Versiyonu temizleyip döndür
 }
 
-// Versiyonlama işlemini yöneten fonksiyon
+// **Versiyonlama işlemini yöneten fonksiyon**
 func RunVersioningAgent() {
 	fmt.Println("🤖 Generating version number using AI...")
 
-	// En son versiyon numarasını `git` üzerinden al
+	// En son versiyon numarasını al
 	currentVersion := GetCurrentVersion()
 
 	// Tüm dosyalardaki değişiklikleri oku
@@ -45,38 +49,48 @@ func RunVersioningAgent() {
 		return
 	}
 
-	// AI'ye yeni versiyon önerisi ve nedeni için prompt hazırla
+	// **AI'ye yeni versiyon önerisi için prompt hazırla**
+	context := "You are an AI assistant following Semantic Versioning principles."
 	prompt := fmt.Sprintf(`
-The current version is %s.
-Analyze the following Git diff and suggest a new Semantic Versioning number.
-Explain why this version change is necessary based on the type of changes.
-
-Changes:
+## Current Version: %s
+## Changes:
 %s
 
-Your response should include:
-1. The new version number.
-2. A short explanation of why this version number was chosen (major, minor, or patch).
-3. A brief summary of the key changes.
+Analyze these changes and suggest a new Semantic Version number. 
+Format: 
+VERSION: X.Y.Z
+EXPLANATION: 
+- Reason 1
+- Reason 2
+- Reason 3
+SUMMARY OF CHANGES:
+- Change 1
+- Change 2
+- Change 3
 `, currentVersion, gitDiff)
 
+	aiResponse, err := gemini.GetGeminiResponse(context, prompt)
+
 	// AI'den yeni versiyon önerisini al
-	aiResponse, err := gemini.GetGeminiResponse(prompt)
 	if err != nil {
 		fmt.Println("❌ Error getting AI versioning suggestion:", err)
 		return
 	}
 
-	// AI yanıtını parse et ve versiyon numarası ile nedenini ayır
-	newVersion, reason := ExtractVersionAndReason(aiResponse)
+	fmt.Println("\n🔍 AI Response:")
+	fmt.Println(aiResponse)
+
+	// **AI yanıtını parse et ve versiyon numarası ile nedenini ayır**
+	newVersion, reason, summary := ExtractVersionAndReason(aiResponse)
 	if newVersion == "" {
 		fmt.Println("❌ AI did not provide a valid version number.")
 		return
 	}
 
-	// Kullanıcıya önerilen versiyonu ve nedenini göster ve onay al
+	// **Kullanıcıya önerilen versiyonu ve nedenini göster ve onay al**
 	fmt.Printf("\n📜 AI Suggested Version: v%s\n", newVersion)
 	fmt.Println("📝 Reason:", reason)
+	fmt.Println("🔹 Summary:", summary)
 	fmt.Println("\nDo you want to tag this version? (y/n/r)")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -92,8 +106,8 @@ Your response should include:
 			return
 		}
 
-		// 📜 **README.md dosyasını AI ile güncelle**
-		err = UpdateReadme(fmt.Sprintf("New version released: v%s", newVersion), reason)
+		// **README.md dosyasını AI ile güncelle**
+		err = UpdateReadme(fmt.Sprintf("New version released: v%s", newVersion), reason, summary)
 		if err != nil {
 			fmt.Println("❌ Error updating README.md:", err)
 			return
@@ -124,18 +138,33 @@ Your response should include:
 }
 
 // **Gemini yanıtından versiyon numarasını çıkart**
-func ExtractVersionAndReason(response string) (string, string) {
-	matches := semVerRegex.FindStringSubmatch(response)
-	if len(matches) == 0 {
-		return "", ""
+func ExtractVersionAndReason(response string) (string, string, string) {
+	versionMatch := SemVerRegex.FindStringSubmatch(response)
+	reasonMatch := ReasonRegex.FindStringSubmatch(response)
+	summaryMatch := SummaryRegex.FindStringSubmatch(response)
+
+	var version, reason, summary string
+
+	// **Versiyon Numarasını Al**
+	if len(versionMatch) > 1 {
+		version = strings.TrimSpace(versionMatch[1])
 	}
 
-	// Versiyon numarasını al
-	version := matches[0]
+	// **Açıklamayı Al**
+	if len(reasonMatch) > 1 {
+		reason = strings.TrimSpace(reasonMatch[1])
+	}
 
-	// Versiyon numarasını kaldırarak kalan metni neden olarak al
-	reason := strings.Replace(response, version, "", 1)
-	reason = strings.TrimSpace(reason)
+	// **Özet Bilgisini Al**
+	if len(summaryMatch) > 1 {
+		summary = strings.TrimSpace(summaryMatch[1])
+	}
 
-	return version, reason
+	// **Eğer versiyon bulunamadıysa hata döndür**
+	if version == "" {
+		fmt.Println("❌ AI response did not contain a valid version number.")
+		return "", "", ""
+	}
+
+	return version, reason, summary
 }

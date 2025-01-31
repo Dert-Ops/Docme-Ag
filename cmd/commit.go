@@ -34,12 +34,15 @@ func RunCommitAgent() {
 	// AI tarafından üretilen commit mesajı almak için döngü
 	var commitMessage string
 	var prompt string
+
+	context := "You are an AI assistant that generates Git commit messages following Conventional Commits format."
+	if prompt == "" {
+		prompt = fmt.Sprintf("Analyze the following Git diff and suggest a Conventional Commit message:\n\n%s", gitDiff)
+	}
+
 	for {
 		fmt.Println("🤖 Generating commit message using AI...")
-		if prompt == "" {
-			prompt = fmt.Sprintf("Analyze the following Git diff and suggest a Conventional Commit message:\n\n%s", gitDiff)
-		}
-		commitMessage, err = gemini.GetGeminiResponse(prompt)
+		commitMessage, err = gemini.GetGeminiResponse(context, prompt)
 		if err != nil {
 			fmt.Println("❌ Error getting AI commit message:", err)
 			return
