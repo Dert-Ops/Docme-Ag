@@ -51,6 +51,17 @@ MAJOR.MINOR.PATCH
 2.0.0  # Major change, breaking backward compatibility
 ```
 
+
+##  📌 New Version: v1.1.0
+
+- **Reason for Version Change:** The changes modify the functionality of existing features, requiring a minor version bump.
+- **Summary of Changes:**
+    - Modified `UpdateReadme` function to accept version, reason, and summary.
+    - Updated prompt generation for README updates.
+    - Enhanced `ExtractVersionAndReason` to extract summary and handle missing versions.
+    - Improved `GetCurrentVersion` and `RunVersioningAgent` with better comments and logic.
+
+
 ## Installation
 1. Clone the repository:
    ```sh
