@@ -8,7 +8,7 @@ import (
 	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 )
 
-func UpdateReadme(commitMessage, version string) error {
+func UpdateReadme(commitMessage, reason string) error {
 	readmePath := "README.md"
 
 	// README.md dosyasını oku
@@ -18,16 +18,20 @@ func UpdateReadme(commitMessage, version string) error {
 		return err
 	}
 
-	// Versiyon numarasını README.md'ye ekleyerek AI'ye prompt gönder
+	// Versiyon güncelleme açıklamasını README.md'ye ekleyerek AI'ye prompt gönder
 	prompt := fmt.Sprintf(`
 The following is the current README.md content:
 
 %s
 
-The latest version is now v%s.
+A new version has been released.
 
-Update this README.md file to reflect the new version information in a structured and clear way.
-`, string(readmeContent), version)
+## New Version Details
+- **Commit Message:** %s
+- **Reason for Version Change:** %s
+
+Update this README.md file to reflect the new version details in a structured and clear way.
+`, string(readmeContent), commitMessage, reason)
 
 	// AI'den güncellenmiş README.md içeriğini al
 	updatedReadme, err := gemini.GetGeminiResponse(prompt)
@@ -51,7 +55,7 @@ Update this README.md file to reflect the new version information in a structure
 		return err
 	}
 
-	cmd = exec.Command("git", "commit", "-m", "docs: update README with new version information")
+	cmd = exec.Command("git", "commit", "-m", "docs: update README with new version details")
 	err = cmd.Run()
 	if err != nil {
 		fmt.Println("❌ Error committing README.md:", err)

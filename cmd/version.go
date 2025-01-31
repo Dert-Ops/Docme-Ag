@@ -45,28 +45,38 @@ func RunVersioningAgent() {
 		return
 	}
 
-	// AI'ye yeni versiyon önerisi için prompt hazırla
-	prompt := fmt.Sprintf(
-		"The current version is %s. Analyze the following Git diff and suggest a new Semantic Versioning number based on the changes:\n\n%s",
-		currentVersion, gitDiff,
-	)
+	// AI'ye yeni versiyon önerisi ve nedeni için prompt hazırla
+	prompt := fmt.Sprintf(`
+The current version is %s.
+Analyze the following Git diff and suggest a new Semantic Versioning number.
+Explain why this version change is necessary based on the type of changes.
+
+Changes:
+%s
+
+Your response should include:
+1. The new version number.
+2. A short explanation of why this version number was chosen (major, minor, or patch).
+3. A brief summary of the key changes.
+`, currentVersion, gitDiff)
 
 	// AI'den yeni versiyon önerisini al
-	newVersion, err := gemini.GetGeminiResponse(prompt)
+	aiResponse, err := gemini.GetGeminiResponse(prompt)
 	if err != nil {
 		fmt.Println("❌ Error getting AI versioning suggestion:", err)
 		return
 	}
 
-	// AI yanıtından versiyon numarasını temizle
-	newVersion = ExtractVersionFromResponse(newVersion)
+	// AI yanıtını parse et ve versiyon numarası ile nedenini ayır
+	newVersion, reason := ExtractVersionAndReason(aiResponse)
 	if newVersion == "" {
 		fmt.Println("❌ AI did not provide a valid version number.")
 		return
 	}
 
-	// Kullanıcıya önerilen versiyonu göster ve onay al
+	// Kullanıcıya önerilen versiyonu ve nedenini göster ve onay al
 	fmt.Printf("\n📜 AI Suggested Version: v%s\n", newVersion)
+	fmt.Println("📝 Reason:", reason)
 	fmt.Println("\nDo you want to tag this version? (y/n/r)")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -83,7 +93,7 @@ func RunVersioningAgent() {
 		}
 
 		// 📜 **README.md dosyasını AI ile güncelle**
-		err = UpdateReadme("New version released", newVersion)
+		err = UpdateReadme(fmt.Sprintf("New version released: v%s", newVersion), reason)
 		if err != nil {
 			fmt.Println("❌ Error updating README.md:", err)
 			return
@@ -114,10 +124,18 @@ func RunVersioningAgent() {
 }
 
 // **Gemini yanıtından versiyon numarasını çıkart**
-func ExtractVersionFromResponse(response string) string {
+func ExtractVersionAndReason(response string) (string, string) {
 	matches := semVerRegex.FindStringSubmatch(response)
-	if len(matches) > 0 {
-		return matches[0] // İlk eşleşen versiyon numarasını döndür
+	if len(matches) == 0 {
+		return "", ""
 	}
-	return ""
+
+	// Versiyon numarasını al
+	version := matches[0]
+
+	// Versiyon numarasını kaldırarak kalan metni neden olarak al
+	reason := strings.Replace(response, version, "", 1)
+	reason = strings.TrimSpace(reason)
+
+	return version, reason
 }
