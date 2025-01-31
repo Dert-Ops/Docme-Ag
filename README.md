@@ -12,33 +12,43 @@ Docme-Ag is an AI-powered CLI tool that automates commit message generation, ver
 
 ---
 
-## 📥 Installation  
+## 📥 Installation & Uninstallation
 
-### 🔹 **Install via Installer Script**  
-You can install `docm` by running the following command:  
+### 🔹 **Quick Install via Installer Script**  
+Easily install `docm` with the following command:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/Dert-Ops/Docme-Ag/main/installer.sh | bash
 ```
 
 ### 🔹 **Manual Installation**  
-Alternatively, download the binary manually:  
+For manual installation, follow these steps:
 ```sh
 LATEST_VERSION=$(curl -s https://api.github.com/repos/Dert-Ops/Docme-Ag/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 wget -O docm "https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-linux-amd64"
 chmod +x docm
-mv docm /usr/local/bin/
+sudo mv docm /usr/local/bin/
 ```
 
-After installation, make sure you set up your **GEMINI API KEY**:  
+### 🔹 **Post-Installation Setup**  
+Ensure your **GEMINI API KEY** is set:
 ```sh
 echo 'export GEMINI_API_KEY="your-api-key-here"' >> ~/.bashrc
 source ~/.bashrc
 ```
-For **Mac users** (zsh default shell):  
+For **Mac users** (zsh default shell):
 ```sh
 echo 'export GEMINI_API_KEY="your-api-key-here"' >> ~/.zshrc
 source ~/.zshrc
 ```
+
+### 🔹 **Uninstallation**  
+To remove `docm` from your system, run:
+```sh
+sudo rm -f /usr/local/bin/docm
+sed -i '/GEMINI_API_KEY/d' ~/.bashrc ~/.zshrc
+source ~/.bashrc || source ~/.zshrc
+```
+This will remove the binary and environment variables.
 
 ---
 
