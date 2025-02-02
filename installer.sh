@@ -2,7 +2,6 @@
 
 # ENV Dosyası Konumları
 USER_ENV="$HOME/.docm.env"
-SYSTEM_ENV="/etc/docm.env"
 DEFAULT_ENV_CONTENT="GEMINI_API_KEY=your-api-key-here"
 
 # Kullanıcının işletim sistemini tespit et
@@ -24,13 +23,30 @@ fi
 echo "📥 Downloading docm $LATEST_VERSION for $OS..."
 wget -O docm $BINARY_URL
 
-# Binary'yi sistem dizinine taşı
-echo "🚀 Installing to /usr/local/bin/..."
-sudo mv docm /usr/local/bin/docm
-sudo chmod +x /usr/local/bin/docm
+# ~/.local/bin dizinini oluştur
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
+
+# Binary'yi kullanıcı dizinine taşı
+echo "🚀 Installing to $BIN_DIR/..."
+mv docm "$BIN_DIR/docm"
+chmod +x "$BIN_DIR/docm"
+
+# Kullanıcıya PATH'i güncellemesi gerektiğini hatırlat
+if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+    echo "🔧 Adding $BIN_DIR to your PATH. This change will be effective after restarting your terminal."
+    # PATH'i .bashrc veya .zshrc'ye ekle
+    if [ -n "$ZSH_VERSION" ]; then
+        echo "export PATH=\$PATH:$BIN_DIR" >> "$HOME/.zshrc"
+    else
+        echo "export PATH=\$PATH:$BIN_DIR" >> "$HOME/.bashrc"
+    fi
+else
+    echo "✅ $BIN_DIR is already in your PATH."
+fi
 
 # Kullanıcıya ENV dosyasının konumunu sormadan önce, var olup olmadığını kontrol et
-if [ ! -f "$USER_ENV" ] && [ ! -f "$SYSTEM_ENV" ]; then
+if [ ! -f "$USER_ENV" ]; then
     echo "🔧 No existing .env file found. Creating a new one..."
     echo "$DEFAULT_ENV_CONTENT" > "$USER_ENV"
     chmod 600 "$USER_ENV"
@@ -39,4 +55,4 @@ else
     echo "✅ Existing .env file found. No changes were made."
 fi
 
-echo "✅ Installation complete! Now you can use 'docm cm' or 'docm vs'."
+echo "✅ Installation complete! Now you can use 'docm cm' or 'docm vs' after restarting your terminal."
