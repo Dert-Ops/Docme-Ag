@@ -106,13 +106,6 @@ SUMMARY OF CHANGES:
 			return
 		}
 
-		// **README.md dosyasını AI ile güncelle**
-		err = UpdateReadme(fmt.Sprintf("New version released: v%s", newVersion), reason, summary)
-		if err != nil {
-			fmt.Println("❌ Error updating README.md:", err)
-			return
-		}
-
 		// Kullanıcıdan push için onay al
 		fmt.Println("\n🚀 Do you want to push this tag to the repository? (Y/n)")
 		input, _ = reader.ReadString('\n')
@@ -129,6 +122,8 @@ SUMMARY OF CHANGES:
 		} else {
 			fmt.Println("❌ Push canceled.")
 		}
+
+		// **README güncellemeyi buradan çıkardık!**
 	} else if input == "r" || input == "R" {
 		fmt.Println("\n🔄 Regenerating version suggestion...")
 		RunVersioningAgent() // Yeniden başlat
@@ -167,4 +162,11 @@ func ExtractVersionAndReason(response string) (string, string, string) {
 	}
 
 	return version, reason, summary
+}
+
+func UpdateProjectDocs(newVersion, reason, summary string) {
+	err := UpdateReadme(fmt.Sprintf("New version released: v%s", newVersion), reason, summary)
+	if err != nil {
+		fmt.Println("❌ Error updating README.md:", err)
+	}
 }
