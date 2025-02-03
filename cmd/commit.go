@@ -81,11 +81,11 @@ func RunCommitAgent() {
 	}
 
 	// Kullanıcıdan push için onay al
-	fmt.Println("\n🚀 Do you want to push this commit to the repository? (y/n)")
+	fmt.Println("\n🚀 Do you want to push this commit to the repository? (Y/n)")
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 
-	if input == "y" || input == "Y" {
+	if input == "y" || input == "Y" || input == "" {
 		fmt.Println("📤 Pushing changes to remote repository...")
 		err = git.PushChanges()
 		if err != nil {
