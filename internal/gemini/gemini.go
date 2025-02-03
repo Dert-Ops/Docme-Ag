@@ -85,7 +85,7 @@ func GetGeminiResponse(context, prompt string) (string, error) {
 	}
 
 	// **API yanıtını ekrana yazdır (debug için)**
-	fmt.Println("\n🔍 Raw API Response:", string(body))
+	// fmt.Println("\n🔍 Raw API Response:", string(body))
 
 	// **Yanıtı JSON olarak çözümle**
 	var response GeminiResponse

@@ -4,24 +4,38 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 )
 
-// **README.md dosyasını güncelleyen fonksiyon**
-func UpdateReadme(version, reason, summary string) error {
-	readmePath := filepath.Join(".", "README.md")
+// README.md'yi güncelleyen fonksiyon
+func UpdateReadme(commitMessage, reason, summary string) error {
+	readmePath := "README.md"
 
-	// **Mevcut README içeriğini oku**
+	// README.md mevcut mu?
+	_, err := os.Stat(readmePath)
+	if os.IsNotExist(err) {
+		fmt.Println("⚠️ README.md not found. Creating a new one...")
+		file, err := os.Create(readmePath)
+		if err != nil {
+			fmt.Println("❌ Error creating README.md:", err)
+			return err
+		}
+		file.Close()
+	}
+
+	// README.md içeriğini oku
 	readmeContent, err := os.ReadFile(readmePath)
 	if err != nil {
 		fmt.Println("❌ Error reading README.md:", err)
 		return err
 	}
 
-	// **AI'ye güncellenmiş README.md oluşturması için prompt hazırla**
-	context := "You are an AI assistant that updates README.md files with new version details."
+	// **AI'ye yeni versiyon bilgilerini sorarken context ekle**
+	context := "You are an AI assistant responsible for updating a project's README.md file. Ensure clarity and structure while incorporating the latest version details."
+
+	currentVersion := GetCurrentVersion()
+
 	prompt := fmt.Sprintf(`
 The following is the current README.md content:
 
@@ -29,43 +43,42 @@ The following is the current README.md content:
 
 A new version has been released.
 
-## 📌 New Version: v%s
-
+## New Version Details
+- **Version:** %s
+- **Commit Message:** %s
 - **Reason for Version Change:** %s
 - **Summary of Changes:** %s
 
 Update this README.md file to reflect the new version details in a structured and clear way.
-Make sure to:
-1. Clearly indicate that the new version is v%s.
-2. Include a short description of the key changes.
-3. Keep existing important content intact.
-`, string(readmeContent), version, reason, summary, version)
+`, string(readmeContent), currentVersion, commitMessage, reason, summary)
 
-	// **AI'den güncellenmiş README.md içeriğini al**
+	// AI'den güncellenmiş README içeriğini al
 	updatedReadme, err := gemini.GetGeminiResponse(context, prompt)
 	if err != nil {
 		fmt.Println("❌ Error getting AI-suggested README.md:", err)
 		return err
 	}
 
-	// **DEBUG: AI'den dönen içeriği yazdır**
-	fmt.Println("\n🔍 AI Suggested README.md Content:")
-	fmt.Println(updatedReadme)
-
-	// **Eğer AI boş veya geçersiz bir içerik döndürdüyse hata ver**
-	if updatedReadme == "" {
-		fmt.Println("❌ AI response for README.md update was empty.")
-		return fmt.Errorf("AI did not generate a valid README update")
+	// Eğer AI boş veya geçersiz veri döndürdüyse, eski halini koru
+	if updatedReadme == "" || len(updatedReadme) < 50 {
+		fmt.Println("⚠️ AI did not return a valid README update. Keeping the old version.")
+		return nil
 	}
 
-	// **README.md dosyasını güncelle**
+	// Eğer yeni içerik aynıysa, güncelleme yapma
+	if string(readmeContent) == updatedReadme {
+		fmt.Println("✅ README.md is already up-to-date. No changes made.")
+		return nil
+	}
+
+	// README.md'yi güncelle
 	err = os.WriteFile(readmePath, []byte(updatedReadme), 0644)
 	if err != nil {
 		fmt.Println("❌ Error writing to README.md:", err)
 		return err
 	}
 
-	// **Git commit işlemi**
+	// Git commit işlemi
 	cmd := exec.Command("git", "add", "README.md")
 	err = cmd.Run()
 	if err != nil {
@@ -73,14 +86,7 @@ Make sure to:
 		return err
 	}
 
-	commitMessage := fmt.Sprintf(`docs: update README for v%s
-
-- Updated version information in README.md
-- Included explanation for the version bump
-- Summarized key changes in the project
-`, version)
-
-	cmd = exec.Command("git", "commit", "-m", commitMessage)
+	cmd = exec.Command("git", "commit", "-m", "docs: update README with new version details")
 	err = cmd.Run()
 	if err != nil {
 		fmt.Println("❌ Error committing README.md:", err)

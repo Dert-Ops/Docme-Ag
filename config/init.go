@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"sync"
@@ -13,35 +14,31 @@ var (
 	loadAPIKey sync.Once
 )
 
+// API anahtarını yükleyen fonksiyon
 func loadKey() {
 	loadAPIKey.Do(func() {
-		// `.env` dosyasını farklı konumlarda arayacağız
-		envPaths := []string{
-			".env",                           // Proje kök dizininde
-			os.Getenv("HOME") + "/.docm.env", // Kullanıcının home dizininde
-			"/etc/docm.env",                  // Sistem genelinde
+		err := godotenv.Load()
+		if err != nil {
+			fmt.Println("⚠️ Warning: Could not load .env file. If this is your first time using Docme-Ag, set your API key.")
 		}
 
-		var loaded bool
-		for _, path := range envPaths {
-			if _, err := os.Stat(path); err == nil {
-				err := godotenv.Load(path)
-				if err == nil {
-					fmt.Println("✅ Loaded environment variables from:", path)
-					loaded = true
-					break
-				}
-			}
-		}
-
-		if !loaded {
-			fmt.Println("⚠️  Warning: No valid .env file found.")
-		}
-
-		// API anahtarını oku
 		apiKey = os.Getenv("GEMINI_API_KEY")
 		if apiKey == "" {
-			fmt.Println("⚠️  Warning: GEMINI_API_KEY is not set")
+			fmt.Println("\n🔑 GEMINI API Key is not set.")
+			fmt.Print("👉 Please enter your GEMINI API Key: ")
+			reader := bufio.NewReader(os.Stdin)
+			key, _ := reader.ReadString('\n')
+			apiKey = key
+
+			// Key'i .env dosyasına kaydet
+			file, err := os.OpenFile(".env", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err == nil {
+				_, _ = file.WriteString(fmt.Sprintf("GEMINI_API_KEY=%s\n", apiKey))
+				file.Close()
+				fmt.Println("✅ API Key saved successfully in .env file!")
+			} else {
+				fmt.Println("❌ Failed to save API Key. Please set it manually.")
+			}
 		}
 	})
 }
