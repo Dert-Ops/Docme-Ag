@@ -52,22 +52,22 @@ func RunVersioningAgent() {
 	// **AI'ye yeni versiyon önerisi için prompt hazırla**
 	context := "You are an AI assistant following Semantic Versioning principles."
 	prompt := fmt.Sprintf(`
-## Current Version: %s
-## Changes:
-%s
+	## Current Version: %s
+	## Changes:
+	%s
 
-Analyze these changes and suggest a new Semantic Version number. 
-Format: 
-VERSION: X.Y.Z
-EXPLANATION: 
-- Reason 1
-- Reason 2
-- Reason 3
-SUMMARY OF CHANGES:
-- Change 1
-- Change 2
-- Change 3
-`, currentVersion, gitDiff)
+	Analyze these changes and suggest a new Semantic Version number. 
+	Format: 
+	VERSION: X.Y.Z
+	EXPLANATION: 
+	- Reason 1
+	- Reason 2
+	- Reason 3
+	SUMMARY OF CHANGES:
+	- Change 1
+	- Change 2
+	- Change 3
+	`, currentVersion, gitDiff)
 
 	aiResponse, err := gemini.GetGeminiResponse(context, prompt)
 
