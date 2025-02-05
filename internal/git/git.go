@@ -78,20 +78,33 @@ func CheckGitStatus() (bool, error) {
 }
 
 // Git commit işlemi yap
-func CommitChanges(commitMessage string) error {
-	cmd := exec.Command("git", "add", ".")
-	err := cmd.Run()
+func CreateVersionTag(version string) error {
+	// Önce mevcut tag'leri kontrol et
+	existingTagsCmd := exec.Command("git", "tag", "--list", "v"+version)
+	var existingTags bytes.Buffer
+	existingTagsCmd.Stdout = &existingTags
+	err := existingTagsCmd.Run()
 	if err != nil {
-		return fmt.Errorf("error adding files: %v", err)
+		return fmt.Errorf("❌ Error checking existing Git tags: %v", err)
 	}
 
-	cmd = exec.Command("git", "commit", "-m", commitMessage)
+	// Eğer tag zaten varsa, önce sil
+	if strings.TrimSpace(existingTags.String()) == "v"+version {
+		fmt.Printf("⚠️  Warning: Tag v%s already exists. Deleting and recreating...\n", version)
+		deleteCmd := exec.Command("git", "tag", "-d", "v"+version)
+		if err := deleteCmd.Run(); err != nil {
+			return fmt.Errorf("❌ Error deleting existing tag: %v", err)
+		}
+	}
+
+	// Yeni tag oluştur
+	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
 	err = cmd.Run()
 	if err != nil {
-		return fmt.Errorf("error committing changes: %v", err)
+		return fmt.Errorf("❌ Error creating Git tag: %v", err)
 	}
 
-	fmt.Println("✅ Commit successful:", commitMessage)
+	fmt.Println("✅ Created new Git tag:", version)
 	return nil
 }
 
