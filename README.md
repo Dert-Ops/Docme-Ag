@@ -1,6 +1,6 @@
 # 🚀 Docme-Ag: AI-Powered Commit & Versioning Agent  
 
-**Version: v1.2.0**
+**Version: v1.4.1**
 
 Docme-Ag is an AI-powered CLI tool that automates commit message generation, versioning, and documentation updates in your software projects.
 
@@ -109,6 +109,20 @@ Examples:
 1.1.1  # Minor bug fix
 2.0.0  # Breaking change
 ```
+
+---
+
+
+## 📑 Changelog
+
+### v1.4.1
+
+- **Commit:** New version released: v1.4.1
+- **Changes:**
+    - Consolidated README updating logic within `UpdateProjectDocs` function.
+    - Moved Git commit and tagging operations to the `internal/git` package.
+    - Improved code organization and readability.
+
 
 ---
 
