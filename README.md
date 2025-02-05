@@ -1,14 +1,17 @@
 # 🚀 Docme-Ag: AI-Powered Commit & Versioning Agent  
 
-**Version: v1.4.1**
+**Version: v1.5.0**
 
 Docme-Ag is an AI-powered CLI tool that automates commit message generation, versioning, and documentation updates in your software projects.
+
+---
 
 ## 🎯 Features
 - **AI-Generated Commit Messages** - Uses Google Gemini AI to generate commit messages based on code changes.
 - **Automatic Versioning** - Determines the appropriate semantic version number.
 - **README Auto-Updater** - Updates README.md based on new versions and commits.
 - **GitHub Integration** - Works seamlessly with GitHub repositories.
+- **No Go Required** - Runs as a prebuilt binary without requiring Go installation.
 
 ---
 
@@ -115,13 +118,24 @@ Examples:
 
 ## 📑 Changelog
 
-### v1.4.1
+### v1.5.0
 
-- **Commit:** New version released: v1.4.1
+- **Commit:** New version released: v1.5.0
 - **Changes:**
-    - Consolidated README updating logic within `UpdateProjectDocs` function.
-    - Moved Git commit and tagging operations to the `internal/git` package.
-    - Improved code organization and readability.
+    - Added a new command to force README updates.
+    - Improved the application installer.
+    - Enhanced API key management.
+
+
+### v1.4.2
+
+- **Commit:** New version released: v1.4.2
+- **Changes:**
+    - Consolidated README updating logic within UpdateProjectDocs function.
+    - Added docm update command to force update README.md.
+    - Improved installer for Go-independent execution.
+    - Optimized API key handling via docm set-api-key command.
+
 
 
 ---
