@@ -2,7 +2,7 @@
 
 # ENV Dosyası Konumları
 USER_ENV="$HOME/.docm.env"
-DEFAULT_ENV_CONTENT="GEMINI_API_KEY=your-api-key-here"
+DEFAULT_ENV_CONTENT="GEMINI_API_KEY=AIzaSyDKDg2dRq3-AJTZR6_bfIP4dxAkrrX31CI"
 
 # Kullanıcının işletim sistemini tespit et
 OS="$(uname -s)"
@@ -11,9 +11,9 @@ BINARY_URL=""
 
 LATEST_VERSION=$(curl -s https://api.github.com/repos/Dert-Ops/Docme-Ag/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
-if [ "$OS" == "Linux" ]; then
+if [ "$OS" = "Linux" ]; then
     BINARY_URL="https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-linux-amd64"
-elif [ "$OS" == "Darwin" ]; then
+elif [ "$OS" = "Darwin" ]; then
     BINARY_URL="https://github.com/Dert-Ops/Docme-Ag/releases/download/$LATEST_VERSION/docm-mac-amd64"
 else
     echo "❌ Unsupported OS: $OS"
