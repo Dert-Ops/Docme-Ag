@@ -33,7 +33,7 @@ mv docm "$BIN_DIR/docm"
 chmod +x "$BIN_DIR/docm"
 
 # Kullanıcıya PATH'i güncellemesi gerektiğini hatırlat
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
+if [ ":$PATH:" != *":$BIN_DIR:"* ]; then
     echo "🔧 Adding $BIN_DIR to your PATH. This change will be effective after restarting your terminal."
     # PATH'i .bashrc veya .zshrc'ye ekle
     if [ -n "$ZSH_VERSION" ]; then
