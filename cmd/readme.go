@@ -68,31 +68,41 @@ Update this README.md file to reflect the new version details in a structured an
 	// Eğer yeni içerik aynıysa, güncelleme yapma
 	if string(readmeContent) == updatedReadme {
 		fmt.Println("✅ README.md is already up-to-date. No changes made.")
-		return nil
-	}
+	} else {
+		// README.md'yi güncelle
+		err = os.WriteFile(readmePath, []byte(updatedReadme), 0644)
+		if err != nil {
+			fmt.Println("❌ Error writing to README.md:", err)
+			return err
+		}
 
-	// README.md'yi güncelle
-	err = os.WriteFile(readmePath, []byte(updatedReadme), 0644)
-	if err != nil {
-		fmt.Println("❌ Error writing to README.md:", err)
-		return err
-	}
+		// Git commit işlemi
+		cmd := exec.Command("git", "add", "README.md")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("❌ Error adding README.md to Git:", err)
+			return err
+		}
 
-	// Git commit işlemi
-	cmd := exec.Command("git", "add", "README.md")
-	err = cmd.Run()
-	if err != nil {
-		fmt.Println("❌ Error adding README.md to Git:", err)
-		return err
-	}
+		cmd = exec.Command("git", "commit", "-m", "docs: update README with new version details")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("❌ Error committing README.md:", err)
+			return err
+		}
 
-	cmd = exec.Command("git", "commit", "-m", "docs: update README with new version details")
-	err = cmd.Run()
-	if err != nil {
-		fmt.Println("❌ Error committing README.md:", err)
-		return err
+		fmt.Println("✅ README.md updated successfully!")
 	}
-
-	fmt.Println("✅ README.md updated successfully!")
 	return nil
 }
+
+// this func behave like router
+
+// func RunReadmeAgent() error {
+
+// 	// way 1: If there is any readme in the project
+
+// 	// way 2: If there is already readme file
+
+// 	return nil
+// }

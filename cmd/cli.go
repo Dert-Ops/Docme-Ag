@@ -12,6 +12,7 @@ func ExecuteCommand() {
 		fmt.Println("Commands:")
 		fmt.Println("  cm   - Commit changes using AI-generated messages")
 		fmt.Println("  vs   - Generate new version using AI")
+		fmt.Println("  rdm  - Generate or change new readme file")
 		return
 	}
 
@@ -20,6 +21,8 @@ func ExecuteCommand() {
 		RunCommitAgent()
 	case "vs":
 		RunVersioningAgent()
+	// case "rdm":
+	// 	RunReadmeAgent()
 	default:
 		fmt.Println("Unknown command:", os.Args[1])
 	}

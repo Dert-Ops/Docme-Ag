@@ -106,6 +106,9 @@ func RunVersioningAgent() {
 			return
 		}
 
+		// **✅ README.md dosyasını güncelle**
+		UpdateProjectDocs(newVersion, reason, summary)
+
 		// Kullanıcıdan push için onay al
 		fmt.Println("\n🚀 Do you want to push this tag to the repository? (Y/n)")
 		input, _ = reader.ReadString('\n')
@@ -122,8 +125,6 @@ func RunVersioningAgent() {
 		} else {
 			fmt.Println("❌ Push canceled.")
 		}
-
-		// **README güncellemeyi buradan çıkardık!**
 	} else if input == "r" || input == "R" {
 		fmt.Println("\n🔄 Regenerating version suggestion...")
 		RunVersioningAgent() // Yeniden başlat

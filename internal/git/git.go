@@ -40,17 +40,6 @@ func GetGitDiff() (string, error) {
 	return out.String(), nil
 }
 
-func CreateVersionTag(version string) error {
-	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("❌ Error creating Git tag: %v", err)
-	}
-
-	fmt.Println("✅ Created new Git tag:", version)
-	return nil
-}
-
 // Versiyon tag'ını remote repoya push et
 func PushVersionTag(version string) error {
 	cmd := exec.Command("git", "push", "origin", "v"+version)
@@ -126,5 +115,25 @@ func PushChanges() error {
 	}
 
 	fmt.Println("✅ Changes successfully pushed!")
+	return nil
+}
+
+// **Git commit işlemi yap**
+func CommitChanges(commitMessage string) error {
+	// Değişiklikleri ekle
+	cmd := exec.Command("git", "add", ".")
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("❌ Error adding files: %v", err)
+	}
+
+	// Commit işlemi yap
+	cmd = exec.Command("git", "commit", "-m", commitMessage)
+	err = cmd.Run()
+	if err != nil {
+		return fmt.Errorf("❌ Error committing changes: %v", err)
+	}
+
+	fmt.Println("✅ Commit successful:", commitMessage)
 	return nil
 }
