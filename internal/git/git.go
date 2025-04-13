@@ -120,16 +120,13 @@ func PushChanges() error {
 
 // **Git commit işlemi yap**
 func CommitChanges(commitMessage string) error {
-	// Değişiklikleri ekle
-	cmd := exec.Command("git", "add", ".")
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("❌ Error adding files: %v", err)
-	}
-
 	// Commit işlemi yap
-	cmd = exec.Command("git", "commit", "-m", commitMessage)
-	err = cmd.Run()
+	// add yapilan dosyalarin kontrolu saglanmali yani,
+	// 		add yapilmis dosya var mi?
+	//			eger yoksa kullaniya soru sorsun:
+	//				1. add yapmaniz gerekiyor isterseniz otomatik hepsini add yapabilirim veya manuel olarak siz yapin.
+	cmd := exec.Command("git", "commit", "-m", commitMessage)
+	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("❌ Error committing changes: %v", err)
 	}
