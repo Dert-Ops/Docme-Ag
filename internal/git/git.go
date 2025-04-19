@@ -40,9 +40,29 @@ func GetGitDiff() (string, error) {
 	return out.String(), nil
 }
 
+// CreateVersionTag creates or updates a version tag
 func CreateVersionTag(version string) error {
+	// Check existing tags
+	existingTagsCmd := exec.Command("git", "tag", "--list", "v"+version)
+	var existingTags bytes.Buffer
+	existingTagsCmd.Stdout = &existingTags
+	err := existingTagsCmd.Run()
+	if err != nil {
+		return fmt.Errorf("❌ Error checking existing Git tags: %v", err)
+	}
+
+	// If tag exists, delete it
+	if strings.TrimSpace(existingTags.String()) == "v"+version {
+		fmt.Printf("⚠️  Warning: Tag v%s already exists. Deleting and recreating...\n", version)
+		deleteCmd := exec.Command("git", "tag", "-d", "v"+version)
+		if err := deleteCmd.Run(); err != nil {
+			return fmt.Errorf("❌ Error deleting existing tag: %v", err)
+		}
+	}
+
+	// Create new tag
 	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("❌ Error creating Git tag: %v", err)
 	}
@@ -75,37 +95,6 @@ func CheckGitStatus() (bool, error) {
 		return false, nil
 	}
 	return true, nil
-}
-
-// Git commit işlemi yap
-func CreateVersionTag(version string) error {
-	// Önce mevcut tag'leri kontrol et
-	existingTagsCmd := exec.Command("git", "tag", "--list", "v"+version)
-	var existingTags bytes.Buffer
-	existingTagsCmd.Stdout = &existingTags
-	err := existingTagsCmd.Run()
-	if err != nil {
-		return fmt.Errorf("❌ Error checking existing Git tags: %v", err)
-	}
-
-	// Eğer tag zaten varsa, önce sil
-	if strings.TrimSpace(existingTags.String()) == "v"+version {
-		fmt.Printf("⚠️  Warning: Tag v%s already exists. Deleting and recreating...\n", version)
-		deleteCmd := exec.Command("git", "tag", "-d", "v"+version)
-		if err := deleteCmd.Run(); err != nil {
-			return fmt.Errorf("❌ Error deleting existing tag: %v", err)
-		}
-	}
-
-	// Yeni tag oluştur
-	cmd := exec.Command("git", "tag", "-a", "v"+version, "-m", "Version "+version)
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("❌ Error creating Git tag: %v", err)
-	}
-
-	fmt.Println("✅ Created new Git tag:", version)
-	return nil
 }
 
 // **Git Push İşlemini Mevcut Branch İçin Yap**
