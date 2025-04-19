@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/Dert-Ops/Docme-Ag/internal/gemini"
 )
@@ -93,6 +94,38 @@ Update this README.md file to reflect the new version details in a structured an
 
 		fmt.Println("✅ README.md updated successfully!")
 	}
+	return nil
+}
+
+// RunReadmeAgent handles the README generation process
+func RunReadmeAgent() error {
+	// Get the latest commit message
+	cmd := exec.Command("git", "log", "-1", "--pretty=%B")
+	commitMsg, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("❌ ERROR: Could not get latest commit message: %v", err)
+	}
+
+	// Extract reason and summary from commit message
+	commitMessage := strings.TrimSpace(string(commitMsg))
+	reason := "Automated version update" // Default reason
+	summary := commitMessage            // Use commit message as summary
+
+	// If commit message follows conventional commits format
+	if strings.Contains(commitMessage, ":") {
+		parts := strings.SplitN(commitMessage, ":", 2)
+		if len(parts) == 2 {
+			reason = strings.TrimSpace(parts[0])
+			summary = strings.TrimSpace(parts[1])
+		}
+	}
+
+	// Update the README
+	err = UpdateReadme(commitMessage, reason, summary)
+	if err != nil {
+		return fmt.Errorf("❌ ERROR: Failed to update README: %v", err)
+	}
+
 	return nil
 }
 

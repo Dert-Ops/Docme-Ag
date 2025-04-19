@@ -10,11 +10,6 @@ func ExecuteCommand() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: docm <command>")
 		fmt.Println("Commands:")
-<<<<<<< HEAD
-		fmt.Println("  cm   - Commit changes using AI-generated messages")
-		fmt.Println("  vs   - Generate new version using AI")
-		fmt.Println("  rdm  - Generate or change new readme file")
-=======
 		fmt.Println("  cm     - Commit changes using AI-generated messages")
 		fmt.Println("  vs     - Generate new version using AI")
 		fmt.Println("  readme - Update README.md with latest version details")
