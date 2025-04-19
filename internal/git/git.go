@@ -117,3 +117,21 @@ func PushChanges() error {
 	fmt.Println("✅ Changes successfully pushed!")
 	return nil
 }
+
+// CommitChanges commits changes with the given message
+func CommitChanges(message string) error {
+	// Add all changes
+	addCmd := exec.Command("git", "add", ".")
+	if err := addCmd.Run(); err != nil {
+		return fmt.Errorf("❌ Error adding changes: %v", err)
+	}
+
+	// Commit changes
+	commitCmd := exec.Command("git", "commit", "-m", message)
+	if err := commitCmd.Run(); err != nil {
+		return fmt.Errorf("❌ Error committing changes: %v", err)
+	}
+
+	fmt.Println("✅ Changes committed successfully!")
+	return nil
+}
