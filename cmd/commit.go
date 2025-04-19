@@ -50,7 +50,7 @@ func RunCommitAgent() {
 
 		fmt.Println("\n📜 AI Suggested Commit Message:")
 		fmt.Println(commitMessage)
-		fmt.Println("\nDo you want to commit this change? (y/n/r)")
+		fmt.Println("\nDo you want to commit this change? (y/n/retry)")
 
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
